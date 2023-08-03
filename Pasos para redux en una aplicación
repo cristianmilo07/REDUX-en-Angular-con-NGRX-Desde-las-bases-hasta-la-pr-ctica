@@ -1,0 +1,34 @@
+1. Se crea 2 archivos en la carpeta shared
+    ui.actions.ts  
+    ui.reducer.ts
+
+2. En ui.actions.ts
+    Se hacen unos pasos
+
+    Se instala https://ngrx.io/guide/store/install
+    importante mirar la versión de angular q se este trabajando
+    
+
+3. En ui.reducer.ts
+    Se hace unos pasos
+
+4. Después en la carpeta App se crea un app.reducer.ts
+
+5. Después en app.module.ts
+        imports: [BrowserModule, StoreModule.forRoot({ count: counterReducer })],
+        En esta línea en este proyecto ==> StoreModule.forRoot( appReducers ),
+
+6. Debemos instalar  ngrx store-devtools
+    https://www.npmjs.com/package/@ngrx/store-devtools/v/15.0.0
+
+    guia
+    https://v7.ngrx.io/guide/store-devtools
+
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production, // Restrict extension to log-only mode
+    }),
+
+    
+
+
