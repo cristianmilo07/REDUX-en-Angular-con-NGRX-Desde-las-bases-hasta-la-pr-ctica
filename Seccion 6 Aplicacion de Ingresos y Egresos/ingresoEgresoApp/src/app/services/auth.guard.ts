@@ -14,11 +14,11 @@ export class AuthGuard implements CanActivate {
   ){}
   canActivate():  Observable<boolean> {
     return this.authService.isAuth()
-    //.pipe(
-    //  tap( estado => {
-    //    if( !estado) { this.router.navigate(['/login'])}
-    //  })
-    //s);
+    .pipe(
+      tap( estado => {
+        if( !estado) { this.router.navigate(['/login'])}
+      })
+    );
   }
   
 }
