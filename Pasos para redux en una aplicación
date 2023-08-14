@@ -7,6 +7,8 @@
 
     Se instala https://ngrx.io/guide/store/install
     importante mirar la versión de angular q se este trabajando
+
+    npm install @ngrx/store --save
     
 
 3. En ui.reducer.ts
@@ -15,6 +17,10 @@
 4. Después en la carpeta App se crea un app.reducer.ts
 
 5. Después en app.module.ts
+        
+        abajo en el final
+        https://ngrx.io/guide/store
+
         imports: [BrowserModule, StoreModule.forRoot({ count: counterReducer })],
         En esta línea en este proyecto ==> StoreModule.forRoot( appReducers ),
 
@@ -24,11 +30,133 @@
     guia
     https://v7.ngrx.io/guide/store-devtools
 
+    imports: [
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode
     }),
+    ]
 
+
+--------------------------
+
+Sección 12 Diseno de nuestra aplicacion - EffectsAppNgrx_effects
+
+1. Se crea una carpeta llamada store vamos a tener todos - donde vamos a crear 3 directorios llamados
+    - actions
+    - reducers
+    - effects
+
+2. Comencemos con actions, se crea un archivo llamado usuarios.actions.ts
+
+    2.1 vamos a importar todo el paquete de ngrx 
+        Se instala https://ngrx.io/guide/store/install
+        importante mirar la versión de angular q se este trabajando
+
+
+        npm install @ngrx/store --save
+        
+        Nota este proyecto estoy trabajando la versión 15
+        npm i @ngrx/store@15.0.0
+
+        colocar esto
+        ngrx-actions
+
+        1. pasos
+        import { createAction } from '@ngrx/store';
+
+        -export const cargarUsuarios = createAction('[Usuarios] cargarUsuarios');
+        
+        -export const cargarUsuariosSuccess = createAction(
+            '[Usuarios] Cargar Usuarios Success',
+            props<{ usuarios: Usuario[] }>()
+        );
+
+        -export const cargarUsuariosError = createAction(
+            '[Usuarios] Cargar Usuarios Success',
+            props<{ payload: any }>()
+        );
     
+3. Vamos a la carpeta reducer a crear un archivo llamado usuarios.reducer.ts
+    
+        colocar esto
+        ngrx-reducer
+
+        import { Action, createReducer, on } from '@ngrx/store';
+        import { cargarUsuarios, cargarUsuariosError, cargarUsuariosSuccess } from '../actions';
+        import { Usuario } from 'src/app/models/usuario.model';
+
+        export interface UsuariosState {
+            users  :  Usuario[],
+            loaded : boolean,
+            loading: boolean,
+            error  : any
+        }
+
+        export const usuariosInitialState: UsuariosState = {
+            users  : [],
+            loaded : false,
+            loading: false,
+            error  : null
+        }
+
+        const _usuariosReducer = createReducer(usuariosInitialState,
+
+            on(cargarUsuarios, state => ({ ...state, loading: true})),
+
+            on(cargarUsuariosSuccess, (state, { usuarios }) => ({ 
+                ...state, 
+                loading: false,
+                loaded: true,
+                users: [ ...usuarios]
+            })),
+
+            on(cargarUsuariosError, (state, { payload }) => ({ 
+                ...state, 
+                loading: false,
+                loaded: true,
+                error: payload
+            })),
+
+        );
+
+        export function usuariosReducer(state: UsuariosState | undefined, action: Action) {
+            return _usuariosReducer(state, action);
+        }
+
+4. Vamos a trabajar con app.reducers.ts el cual es de la aplicación global
+se crea en la carpeta store app.reducers.ts 
+    
+    colocar esto
+    ngrx-app-reducers
 
 
+    import { ActionReducerMap } from '@ngrx/store';
+    import * as reducers from './reducers';
+
+
+    export interface AppState {
+    usuarios: reducers.UsuariosState
+    }
+
+
+
+    export const appReducers: ActionReducerMap<AppState> = {
+    usuarios: reducers.usuariosReducer
+    }
+
+5. vamos a definir algo en el app.module y vamos hacer la configuración
+
+    5.1 Después en app.module.ts
+
+         https://ngrx.io/guide/store
+
+         abajo en el final
+
+        imports: [BrowserModule, StoreModule.forRoot( appReducers )],
+        En esta línea en este proyecto ==> StoreModule.forRoot( appReducers ),
+
+6. Vamos con la instalación de devtools es algo OPCIONAL nos ayuda bastante igualmente cuando estamos aprendiendo
+
+    Debemos instalar  ngrx store-devtools
+    https://www.npmjs.com/package/@ngrx/store-devtools/v/15.0.0
