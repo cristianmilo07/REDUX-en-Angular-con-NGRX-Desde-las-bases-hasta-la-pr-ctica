@@ -1,0 +1,14 @@
+<div class="col">
+    <div class="card h-100" *ngFor="let user of usuarios">
+        <img class="bd-placeholder-img card-img-top" style="width: 15%;"
+        [src]="user.avatar">
+          
+      <div class="card-body">
+        <h5 class="card-title">{{user.first_name}} {{user.last_name}}</h5>
+        <p class="card-text">This is a wider card...</p>
+      </div>
+      <div class="card-footer">
+        <small class="text-body-secondary">{{user.id}}</small>
+      </div>
+    </div>
+  </div>
