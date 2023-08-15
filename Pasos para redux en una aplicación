@@ -181,6 +181,8 @@ se crea en la carpeta store app.reducers.ts
 
 
     7.1. creamos el primer método y añadimos el servicio en la línea 181 :::: 
+    
+    ==> usuarios.effects.ts
 
         cargarUsuario$ = createEffect(
         ()=> this.actions$.pipe(
@@ -215,3 +217,63 @@ se crea en la carpeta store app.reducers.ts
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
     }),
+
+8. Modificamos el método anterior creado :: quitamos los .tap() se hacen para una revisión
+
+    ==> usuarios.effects.ts
+
+    cargarUsuario$ = createEffect(
+        ()=> this.actions$.pipe(
+            ofType(usuariosActions.cargarUsuarios),
+            mergeMap(
+                () => this.usuarioService.getUsers()
+                    .pipe(
+                        map( users => usuariosActions.cargarUsuariosSuccess({usuarios: users}))
+                    )
+            )
+        )
+    )
+
+
+    8.1. Nos vamos a la lista lista.component.ts
+
+    lo q tenemos q hacer es llenar los usuarios con la información q se encuentra en el store
+
+      ngOnInit(): void {
+
+            this.store.select('usuarios').subscribe(({users}) => {
+            this.usuarios = users
+            })
+
+            this.store.dispatch(cargarUsuarios())
+
+        }
+
+    Todo viene de efectos no de peticiones directas hacia los servicios, para eso se carga los efectos
+
+9. Manejo de errores  =>> debe de ir la coma
+
+
+    ==> usuarios.effects.ts
+                        ,
+                        catchError(err => of(usuariosActions.cargarUsuariosError({payload: err})))
+
+
+
+        además modificamos 
+
+    ==>usuario.reducer.ts
+
+        on(cargarUsuariosError, (state, { payload }) => ({ 
+            ...state, 
+            loading: false,
+            loaded: true,
+            error: {
+                url: payload.url,
+                name: payload.name,
+                messages: payload.messages
+            }
+        })),
+
+
+

@@ -19,6 +19,10 @@ export class ListaComponent {
 
   ngOnInit(): void {
 
+    this.store.select('usuarios').subscribe(({users}) => {
+      this.usuarios = users
+    })
+
     this.store.dispatch(cargarUsuarios())
 
   }
