@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Usuario } from 'src/app/models/usuario.model';
-import { UsuarioService } from 'src/app/services/usuario.service';
+import { cargarUsuarios } from 'src/app/store/actions';
+import { AppState } from 'src/app/store/app.reducers';
 
 @Component({
   selector: 'app-lista',
@@ -12,15 +14,13 @@ export class ListaComponent {
   usuarios: Usuario[]= []
 
   constructor(
-    public usuarioService: UsuarioService
+    private store: Store<AppState>
   ){}
 
   ngOnInit(): void {
-    this.usuarioService.getUsers()
-      .subscribe(users => {
-        console.log(users)
-        this.usuarios = users;
-      })
+
+    this.store.dispatch(cargarUsuarios())
+
   }
 
 }

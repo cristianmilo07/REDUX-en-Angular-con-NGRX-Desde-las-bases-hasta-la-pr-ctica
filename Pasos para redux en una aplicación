@@ -160,3 +160,58 @@ se crea en la carpeta store app.reducers.ts
 
     Debemos instalar  ngrx store-devtools
     https://www.npmjs.com/package/@ngrx/store-devtools/v/15.0.0
+
+        imports: [
+        StoreDevtoolsModule.instrument({
+        maxAge: 25, // Retains last 25 states
+        logOnly: environment.production, // Restrict extension to log-only mode
+        }),
+        ]
+
+7. Vamos a crear nuestro primer efecto
+
+    vamos a la carpeta effects y creamos un archivo llamado usuarios.effects.ts
+
+    debemos instalamos 
+    Nota este proyecto estoy trabajando la versión 15
+    https://ngrx.io/guide/effects/install
+
+    npm i @ngrx/effects@15.0.0
+
+
+
+    7.1. creamos el primer método y añadimos el servicio en la línea 181 :::: 
+
+        cargarUsuario$ = createEffect(
+        ()=> this.actions$.pipe(
+            ofType(usuariosActions.cargarUsuarios),
+            tap( data => console.log ('effect tap', data)),
+            mergeMap(
+                () => this.usuarioService.getUsers()
+                    .pipe(
+                        tap( data => console.log('getUsers effect', data))
+                    )
+            )
+        )
+    )
+
+    7.2. Nos dirigimos a lista.component.ts
+
+        constructor(
+            private store: Store<AppState>
+        ){}
+
+        ngOnInit(): void {
+
+            this.store.dispatch(cargarUsuarios())
+
+        }
+    
+
+    7.3. vamos a  https://ngrx.io/guide/effects en la parte de Registering Root Effects
+    app.module.ts
+
+    es esta línea la de abajo ya estaba =>>EffectsModule.forRoot(EffectsArray),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+    }),
