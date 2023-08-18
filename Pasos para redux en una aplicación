@@ -276,4 +276,544 @@ se crea en la carpeta store app.reducers.ts
         })),
 
 
+10. Mostrar información de loading o error como un modal
+
+      loading: boolean = false;
+      error:   any;
+
+        this.loading  = loading;
+        this.error    = error;
+
+11. Entre comillas desde 0 Creando nuevamente USUARIOS, hacer todo lo de los effect pero mandando el argumentos
+
+    Vamos a comenzar
+
+    11.1 Vamos ha acciones para hacer acciones especificas para un usuario 
+
+        11.0.1. Creamos un archivo llamado usuario.actions.ts
+
+        en el export de export const cargarUsuario = createAction
+        necesito un argumento por eso cambia para mandar el argumento
+
+
+        import { createAction, props } from '@ngrx/store';
+        import { Usuario } from 'src/app/models/usuario.model';
+
+        export const cargarUsuario = createAction(
+            '[Usuario] Cargar Usuarios',
+            props<{ id : string}>()
+            );
+
+        export const cargarUsuarioSuccess = createAction(
+            '[Usuario] Cargar Usuario Success',
+            props<{ usuario: Usuario }>()
+        );
+
+        export const cargarUsuarioError = createAction(
+            '[Usuario] Cargar Usuario Success',
+            props<{ payload: any }>()
+        );
+
+        11.0.2. Vamos al index y lo exportamos
+        export * from './usuario.actions';
+
+        11.0.3. Creamos un archivo llamado usuarios.reducer.ts
+
+            1. Se crea 2 archivos en la carpeta shared
+    ui.actions.ts  
+    ui.reducer.ts
+
+2. En ui.actions.ts
+    Se hacen unos pasos
+
+    Se instala https://ngrx.io/guide/store/install
+    importante mirar la versión de angular q se este trabajando
+
+    npm install @ngrx/store --save
+    
+
+3. En ui.reducer.ts
+    Se hace unos pasos
+
+4. Después en la carpeta App se crea un app.reducer.ts
+
+5. Después en app.module.ts
+        
+        abajo en el final
+        https://ngrx.io/guide/store
+
+        imports: [BrowserModule, StoreModule.forRoot({ count: counterReducer })],
+        En esta línea en este proyecto ==> StoreModule.forRoot( appReducers ),
+
+6. Debemos instalar  ngrx store-devtools
+    https://www.npmjs.com/package/@ngrx/store-devtools/v/15.0.0
+
+    guia
+    https://v7.ngrx.io/guide/store-devtools
+
+    imports: [
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+      logOnly: environment.production, // Restrict extension to log-only mode
+    }),
+    ]
+
+7. Vamos a crear nuestro primer efecto
+
+    vamos a la carpeta effects y creamos un archivo llamado usuarios.effects.ts
+
+    debemos instalamos 
+    Nota este proyecto estoy trabajando la versión 15
+    https://ngrx.io/guide/effects/install
+
+    npm i @ngrx/effects@15.0.0
+
+
+
+    7.1. creamos el primer método y añadimos el servicio en la línea 181 :::: 
+
+        cargarUsuario$ = createEffect(
+        ()=> this.actions$.pipe(
+            ofType(usuariosActions.cargarUsuarios),
+            tap( data => console.log ('effect tap', data)),
+            mergeMap(
+                () => this.usuarioService.getUsers()
+                    .pipe(
+                        tap( data => console.log('getUsers effect', data))
+                    )
+            )
+        )
+    )
+
+    7.2. Nos dirigimos a lista.component.ts
+
+        constructor(
+            private store: Store<AppState>
+        ){}
+
+        ngOnInit(): void {
+
+            this.store.dispatch(cargarUsuarios())
+
+        }
+
+
+    7.3. vamos a  https://ngrx.io/guide/effects en la parte de Registering Root Effects
+    app.module.ts
+
+    es esta línea la de abajo ya estaba =>>EffectsModule.forRoot(EffectsArray),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+    }),
+
+--------------------------
+
+Sección 12 Diseno de nuestra aplicacion - EffectsAppNgrx_effects
+
+1. Se crea una carpeta llamada store vamos a tener todos - donde vamos a crear 3 directorios llamados
+    - actions
+    - reducers
+    - effects
+
+2. Comencemos con actions, se crea un archivo llamado usuarios.actions.ts
+
+    2.1 vamos a importar todo el paquete de ngrx 
+        Se instala https://ngrx.io/guide/store/install
+        importante mirar la versión de angular q se este trabajando
+
+
+        npm install @ngrx/store --save
+        
+        Nota este proyecto estoy trabajando la versión 15
+        npm i @ngrx/store@15.0.0
+
+        colocar esto
+        ngrx-actions
+
+        1. pasos
+        import { createAction } from '@ngrx/store';
+
+        -export const cargarUsuarios = createAction('[Usuarios] cargarUsuarios');
+        
+        -export const cargarUsuariosSuccess = createAction(
+            '[Usuarios] Cargar Usuarios Success',
+            props<{ usuarios: Usuario[] }>()
+        );
+
+        -export const cargarUsuariosError = createAction(
+            '[Usuarios] Cargar Usuarios Success',
+            props<{ payload: any }>()
+        );
+    
+3. Vamos a la carpeta reducer a crear un archivo llamado usuarios.reducer.ts
+    
+        colocar esto
+        ngrx-reducer
+
+        import { Action, createReducer, on } from '@ngrx/store';
+        import { cargarUsuarios, cargarUsuariosError, cargarUsuariosSuccess } from '../actions';
+        import { Usuario } from 'src/app/models/usuario.model';
+
+        export interface UsuariosState {
+            users  :  Usuario[],
+            loaded : boolean,
+            loading: boolean,
+            error  : any
+        }
+
+        export const usuariosInitialState: UsuariosState = {
+            users  : [],
+            loaded : false,
+            loading: false,
+            error  : null
+        }
+
+        const _usuariosReducer = createReducer(usuariosInitialState,
+
+            on(cargarUsuarios, state => ({ ...state, loading: true})),
+
+            on(cargarUsuariosSuccess, (state, { usuarios }) => ({ 
+                ...state, 
+                loading: false,
+                loaded: true,
+                users: [ ...usuarios]
+            })),
+
+            on(cargarUsuariosError, (state, { payload }) => ({ 
+                ...state, 
+                loading: false,
+                loaded: true,
+                error: payload
+            })),
+
+        );
+
+        export function usuariosReducer(state: UsuariosState | undefined, action: Action) {
+            return _usuariosReducer(state, action);
+        }
+
+4. Vamos a trabajar con app.reducers.ts el cual es de la aplicación global
+se crea en la carpeta store app.reducers.ts 
+    
+    colocar esto
+    ngrx-app-reducers
+
+
+    import { ActionReducerMap } from '@ngrx/store';
+    import * as reducers from './reducers';
+
+
+    export interface AppState {
+    usuarios: reducers.UsuariosState
+    }
+
+
+
+    export const appReducers: ActionReducerMap<AppState> = {
+    usuarios: reducers.usuariosReducer
+    }
+
+5. vamos a definir algo en el app.module y vamos hacer la configuración
+
+    5.1 Después en app.module.ts
+
+         https://ngrx.io/guide/store
+
+         abajo en el final
+
+        imports: [BrowserModule, StoreModule.forRoot( appReducers )],
+        En esta línea en este proyecto ==> StoreModule.forRoot( appReducers ),
+
+6. Vamos con la instalación de devtools es algo OPCIONAL nos ayuda bastante igualmente cuando estamos aprendiendo
+
+    Debemos instalar  ngrx store-devtools
+    https://www.npmjs.com/package/@ngrx/store-devtools/v/15.0.0
+
+        imports: [
+        StoreDevtoolsModule.instrument({
+        maxAge: 25, // Retains last 25 states
+        logOnly: environment.production, // Restrict extension to log-only mode
+        }),
+        ]
+
+7. Vamos a crear nuestro primer efecto
+
+    vamos a la carpeta effects y creamos un archivo llamado usuarios.effects.ts
+
+    debemos instalamos 
+    Nota este proyecto estoy trabajando la versión 15
+    https://ngrx.io/guide/effects/install
+
+    npm i @ngrx/effects@15.0.0
+
+
+
+    7.1. creamos el primer método y añadimos el servicio en la línea 181 :::: 
+    
+    ==> usuarios.effects.ts
+
+        cargarUsuario$ = createEffect(
+        ()=> this.actions$.pipe(
+            ofType(usuariosActions.cargarUsuarios),
+            tap( data => console.log ('effect tap', data)),
+            mergeMap(
+                () => this.usuarioService.getUsers()
+                    .pipe(
+                        tap( data => console.log('getUsers effect', data))
+                    )
+            )
+        )
+    )
+
+    7.2. Nos dirigimos a lista.component.ts
+
+        constructor(
+            private store: Store<AppState>
+        ){}
+
+        ngOnInit(): void {
+
+            this.store.dispatch(cargarUsuarios())
+
+        }
+    
+
+    7.3. vamos a  https://ngrx.io/guide/effects en la parte de Registering Root Effects
+    app.module.ts
+
+    es esta línea la de abajo ya estaba =>>EffectsModule.forRoot(EffectsArray),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states
+    }),
+
+8. Modificamos el método anterior creado :: quitamos los .tap() se hacen para una revisión
+
+    ==> usuarios.effects.ts
+
+    cargarUsuario$ = createEffect(
+        ()=> this.actions$.pipe(
+            ofType(usuariosActions.cargarUsuarios),
+            mergeMap(
+                () => this.usuarioService.getUsers()
+                    .pipe(
+                        map( users => usuariosActions.cargarUsuariosSuccess({usuarios: users}))
+                    )
+            )
+        )
+    )
+
+
+    8.1. Nos vamos a la lista lista.component.ts
+
+    lo q tenemos q hacer es llenar los usuarios con la información q se encuentra en el store
+
+      ngOnInit(): void {
+
+            this.store.select('usuarios').subscribe(({users}) => {
+            this.usuarios = users
+            })
+
+            this.store.dispatch(cargarUsuarios())
+
+        }
+
+    Todo viene de efectos no de peticiones directas hacia los servicios, para eso se carga los efectos
+
+9. Manejo de errores  =>> debe de ir la coma
+
+
+    ==> usuarios.effects.ts
+                        ,
+                        catchError(err => of(usuariosActions.cargarUsuariosError({payload: err})))
+
+
+
+        además modificamos 
+
+    ==>usuario.reducer.ts
+
+        on(cargarUsuariosError, (state, { payload }) => ({ 
+            ...state, 
+            loading: false,
+            loaded: true,
+            error: {
+                url: payload.url,
+                name: payload.name,
+                messages: payload.messages
+            }
+        })),
+
+
+10. Mostrar información de loading o error como un modal
+
+      loading: boolean = false;
+      error:   any;
+
+        this.loading  = loading;
+        this.error    = error;
+
+11. Entre comillas desde 0 Creando nuevamente USUARIOS, hacer todo lo de los effect pero mandando el argumentos
+
+    Vamos a comenzar
+
+    11.1 Vamos ha acciones para hacer acciones especificas para un usuario 
+
+        11.0.1. Creamos un archivo llamado usuario.actions.ts
+
+        en el export de export const cargarUsuario = createAction
+        necesito un argumento por eso cambia para mandar el argumento
+
+
+        import { createAction, props } from '@ngrx/store';
+        import { Usuario } from 'src/app/models/usuario.model';
+
+        export const cargarUsuario = createAction(
+            '[Usuario] Cargar Usuarios',
+            props<{ id : string}>()
+            );
+
+        export const cargarUsuarioSuccess = createAction(
+            '[Usuario] Cargar Usuario Success',
+            props<{ usuario: Usuario }>()
+        );
+
+        export const cargarUsuarioError = createAction(
+            '[Usuario] Cargar Usuario Success',
+            props<{ payload: any }>()
+        );
+
+        11.0.2. Vamos al index y lo exportamos
+        export * from './usuario.actions';
+
+        11.0.3. Creamos un archivo llamado usuarios.reducer.ts
+
+            import { Action, createReducer, on } from '@ngrx/store';
+            import { cargarUsuario, cargarUsuarioError, cargarUsuarioSuccess } from '../actions';
+            import { Usuario } from 'src/app/models/usuario.model';
+
+            export interface UsuarioState {
+                id : string
+                user  :  Usuario | null;
+                loaded : boolean,
+                loading: boolean,
+                error  : any
+            }
+
+            export const usuarioInitialState: UsuarioState = {
+                id     : '',
+                user  : null,
+                loaded : false,
+                loading: false,
+                error  : null
+            }
+
+            const _usuarioReducer = createReducer(usuarioInitialState,
+
+                on(cargarUsuario, (state, {id} ) => ({ 
+                    ...state, 
+                    loading: true,
+                    id: id
+                })),
+
+                on(cargarUsuarioSuccess, (state, { usuario }) => ({ 
+                    ...state, 
+                    loading: false,
+                    loaded: true,
+                    user: { ...usuario }
+                })),
+
+                on(cargarUsuarioError, (state, { payload }) => ({ 
+                    ...state, 
+                    loading: false,
+                    loaded: true,
+                    error: payload
+                })),
+
+            );
+
+            export function usuarioReducer(state: UsuarioState | undefined, action: Action) {
+                return _usuarioReducer(state, action);
+            }
+
+            11.0.4. Vamos al index y lo exportamos
+            export * from './usuario.reducer';
+
+
+            11.0.5. Vamos a app.reducers.ts y añadimos esto
+               usuario: reducers.UsuarioState
+
+               usuario: reducers.usuarioReducer
+
+12. Usuarios Effects vamos a mostrar en el buscador 
+
+    12.1. Vamos a usuario.component y creamos esto  
+
+        export class UsuarioComponent implements OnInit{
+
+        constructor( private router: ActivatedRoute){}
+
+        ngOnInit(): void {
+        
+            this.router.params.subscribe( ({ id })=> {
+            console.log( id);
+            }
+            )
+            
+        }
+
+        }
+
+    12.2. Crear en el servicio crear algo q traiga un usuario sería
+      getUserById( id: string){
+        return this.http.get(`${this.url}/users/${id}`)
+            .pipe(
+            map((resp:any) => {
+                return resp['data'];
+            })
+            )
+    }
+
+    12.2. Tengo q hacer el dispatch de la acción
+
+         this.router.params.subscribe( ({ id })=> {
+            this.store.dispatch(cargarUsuario({id}))
+            }
+        )
+
+    12.3. Tengo q hacer el effects
+
+    creamos un archivo llamado usuario.effects.ts
+
+        @Injectable()
+        export class UsuarioEffects {
+            constructor(
+                private actions$: Actions,
+                private usuarioService: UsuarioService
+            ){}
+
+            cargarUsuario$ = createEffect(
+                ()=> this.actions$.pipe(
+                    ofType(usuariosActions.cargarUsuario),
+                    mergeMap(
+                        (actions) => this.usuarioService.getUserById(actions.id)
+                            .pipe(
+                                map( user => usuariosActions.cargarUsuarioSuccess({usuario: user})),
+                                catchError(err => of(usuariosActions.cargarUsuarioError({payload: err})))
+                            )
+                    )
+                )
+            )
+        }
+
+    12.3 Vamos al index de effects
+        para expecificar el usuario.effects.ts
+        
+        export const EffectsArray: any[] = [UsuariosEffects, UsuarioEffects];
+  
+
+
+
+
+
+
 

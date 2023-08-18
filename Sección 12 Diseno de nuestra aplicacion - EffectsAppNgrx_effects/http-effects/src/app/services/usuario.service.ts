@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 })
 export class UsuarioService {
 
-  private url = 'https://reqres.in/apis'
-  // url correcta 'https://reqres.in/api'
+  private url = 'https://reqres.in/api'
+  // url correcta 'https://reqres.in/apis'
 
   constructor(
     private http: HttpClient
@@ -27,4 +27,16 @@ export class UsuarioService {
            })
         )
   }
+
+  getUserById( id: string){
+    return this.http.get(`${this.url}/users/${id}`)
+        .pipe(
+           map((resp:any) => {
+             return resp['data'];
+           })
+        )
+  }
 }
+
+
+

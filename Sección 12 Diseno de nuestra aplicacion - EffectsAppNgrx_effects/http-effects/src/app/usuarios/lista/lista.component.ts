@@ -11,7 +11,9 @@ import { AppState } from 'src/app/store/app.reducers';
 })
 export class ListaComponent {
 
-  usuarios: Usuario[]= []
+  usuarios: Usuario[]= [];
+  loading: boolean = false;
+  error:   any;
 
   constructor(
     private store: Store<AppState>
@@ -19,8 +21,10 @@ export class ListaComponent {
 
   ngOnInit(): void {
 
-    this.store.select('usuarios').subscribe(({users}) => {
-      this.usuarios = users
+    this.store.select('usuarios').subscribe(({users, loading, error}) => {
+      this.usuarios = users;
+      this.loading  = loading;
+      this.error    = error;
     })
 
     this.store.dispatch(cargarUsuarios())
